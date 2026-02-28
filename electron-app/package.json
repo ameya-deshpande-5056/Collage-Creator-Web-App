@@ -17,7 +17,6 @@
     "electron": "^26.0.0",
     "electron-builder": "^24.0.0"
   },
-  "author": "",
   "build": {
     "appId": "com.example.collagecreator",
     "directories": {
