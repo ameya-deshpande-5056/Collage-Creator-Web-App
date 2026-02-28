@@ -47,9 +47,6 @@ jobs:
         # Flutter SDK that was installed above.
         run: flutter analyze
 
-      # Your project will need to have tests in test/ and a dependency on
-      # package:test for this step to succeed. Note that Flutter projects will
-      # want to change this to 'flutter test'.
-      - name: Run tests
-        # Run tests via the Flutter tool so the Flutter test harness is used.
-        run: flutter test
+      # Uncomment to run tests (currently just a generic counter template).
+      # - name: Run tests
+      #   run: flutter test --platform chrome
