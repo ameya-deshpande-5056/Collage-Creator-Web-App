@@ -2,7 +2,12 @@
   "name": "collage-creator-electron",
   "version": "1.0.0",
   "description": "Electron wrapper for Collage Creator Web App",
+  "homepage": "https://github.com/ameya-deshpande-5056/Collage-Creator-Web-App",
   "main": "main.js",
+  "author": {
+    "name": "Ameya Deshpande",
+    "email": "adeshpande610@gmail.com"
+  },
   "scripts": {
     "start": "electron .",
     "package": "electron-builder --win",
@@ -33,7 +38,9 @@
       "target": [
         "AppImage",
         "deb"
-      ]
+      ],
+      "maintainer": "Ameya Deshpande <adeshpande610@gmail.com>",
+      "category": "Graphics"
     }
   }
 }

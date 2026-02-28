@@ -1,0 +1,118 @@
+name: Build and Release Electron Apps
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          architecture: X64
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web version
+        run: flutter build web --release
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install electron deps
+        working-directory: electron-app
+        run: npm install
+
+      - name: Package Windows executable
+        working-directory: electron-app
+        run: npm run package
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: electron-app/dist/*.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          architecture: X64
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web version
+        run: flutter build web --release
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install electron deps
+        working-directory: electron-app
+        run: npm install
+
+      - name: Package Linux executable
+        working-directory: electron-app
+        run: npm run package:linux
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            electron-app/dist/*.AppImage
+            electron-app/dist/*.deb
+
+  release:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-exe
+          path: release-files/windows
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-packages
+          path: release-files/linux
+
+      - name: Create unified release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release-files/windows/*.exe
+            release-files/linux/*.AppImage
+            release-files/linux/*.deb
+          tag_name: release-${{ github.run_number }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

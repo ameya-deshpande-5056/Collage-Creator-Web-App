@@ -88,17 +88,14 @@ npm run package      # produces .AppImage and .deb files
 
 #### Continuous integration
 
-Three workflows are defined:
+The project uses a unified GitHub Actions workflow (`.github/workflows/electron-build-and-release.yml`) that:
+- Builds the web app using Flutter
+- Builds Windows executables on `windows-latest`
+- Builds Linux packages (AppImage + .deb) on `ubuntu-latest`
+- Publishes all binaries to a single GitHub Release
 
-* `dart.yml` – performs `flutter pub get` and `flutter analyze`
-  using the stable Flutter channel (bundles Dart 3.7.2+) so that
-  `environment.sdk: ^3.7.2` in the pubspec resolves correctly.
-* `electron-windows.yml` – runs on `windows-latest`, builds the web app,
-  packages it via Electron for Windows, and publishes artifacts to the
-  **Releases** tab (tag: `latest-windows`).
-* `electron-linux.yml` – runs on `ubuntu-latest`, builds the web app,
-  packages it for Linux (AppImage + .deb), and publishes artifacts to the
-  **Releases** tab (tag: `latest-linux`).
+Additionally, `dart.yml` performs `flutter pub get` and `flutter analyze`
+using the stable Flutter channel to ensure code quality.
 
 #### Testing
 
@@ -130,19 +127,23 @@ Dev dependencies include `flutter_test` and `flutter_lints`.
 
 This repository is primarily a Flutter web app, but you can wrap the
 `build/web` output in an Electron shell to create standalone binaries
-for Windows and Linux. Two CI workflows are provided:
+for Windows and Linux.
 
-1. **Windows CI pipeline** – see `.github/workflows/electron-windows.yml`.
-   Runs on `windows-latest`, builds the web application, packages it via
-   Electron, and publishes the `.exe` files to a GitHub Release
-   (tag: `latest-windows`).
+### Automated CI/CD pipeline
 
-2. **Linux CI pipeline** – see `.github/workflows/electron-linux.yml`.
-   Runs on `ubuntu-latest`, builds the web application, packages it via
-   Electron to create `.AppImage` and `.deb` files, and publishes them to a
-   GitHub Release (tag: `latest-linux`).
+A unified GitHub Actions workflow (`.github/workflows/electron-build-and-release.yml`)
+automatically:
+1. Builds the Flutter web app (`flutter build web --release`)
+2. Packages for Windows using Electron (runs on `windows-latest`)
+3. Packages for Linux using Electron (runs on `ubuntu-latest`)
+4. Creates a single GitHub Release containing all binaries (.exe, .AppImage, .deb)
 
-3. **Local build** – You can perform the same steps on your own machine:
+Releases are created automatically on each push to `main` and tagged with
+`release-<run-number>`. You can find them on the **Releases** page.
+
+### Local build
+
+You can perform the same steps on your own machine:
 
 	```bash
 	# 1. build the web app with Flutter
@@ -158,20 +159,24 @@ for Windows and Linux. Two CI workflows are provided:
 	If you just want to run the app locally without packaging, use
 	`npm start` after the web build step.
 
-	> On Linux the Windows build step requires Wine installed and
+	> On Linux, the Windows build step requires Wine installed and
 	> accessible in your `$PATH`.  Electron-builder will warn if Wine is
 	> missing.
 
 	The `electron-app` directory contains `main.js` (loads
-	`../build/web/index.html`) and a minimal `package.json` with the
-	appropriate `electron-builder` configuration.
+	`../build/web/index.html`) and a `package.json` with the
+	`electron-builder` configuration for both Windows and Linux targets.
 
-Feel free to tweak the `electron-app/build` section to adjust installer
-options, targets, or the application ID.
+Feel free to tweak the `electron-app/package.json` `build` section to adjust
+installer options, targets, appId, or other Electron settings.
+
 ## Downloaded Artifacts
 
-Once the Electron workflows have run, you can download the built executables
-from:
+The unified workflow publishes binaries to:
+- **GitHub Releases page** – all builds tagged `release-<run-number>` (recommended)
+  - Single release contains `.exe`, `.AppImage`, and `.deb` files
+- **GitHub Actions artifacts tab** – individual platform artifacts (temporary)
+  - Available for 90 days per GitHub's default retention policy
 - **GitHub Actions artifacts tab** – latest builds from each workflow run
 - **Releases page** – persistent releases tagged `latest-windows` and `latest-linux`
   (updated on each push to `main`)
