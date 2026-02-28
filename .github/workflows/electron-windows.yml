@@ -17,12 +17,9 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          # ``>=4.0.0`` is not a valid spec for this action; it must be a
-          # concrete version or the keyword `latest`/`stable`.  We only need
-          # a Flutter release that bundles Dart 3.7.2 or newer, so using the
-          # latest stable channel is simplest.  It will always satisfy the
-          # pubspec constraint `sdk: ^3.7.2`.
-          flutter-version: 'latest'
+          # Use stable channel to install the current stable Flutter toolchain
+          channel: stable
+          architecture: X64
 
       - name: Install dependencies
         run: flutter pub get
@@ -44,7 +41,7 @@ jobs:
         run: npm run package
 
       - name: Upload installer
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-executable
           path: electron-app/dist/*.exe
