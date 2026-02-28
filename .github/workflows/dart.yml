@@ -28,7 +28,10 @@ jobs:
       - name: Set up Flutter SDK 
         uses: subosito/flutter-action@v2
         with:
-           flutter-version: '>=4.0.0'   # any release that ships Dart 3.7.2+
+           # Use the latest stable Flutter; it will always include a Dart
+           # SDK ≥3.7.2 so pubspec (sdk:^3.7.2) resolves correctly.  Avoid
+           # semver ranges here since the action cannot parse them.
+           flutter-version: 'latest'
 
       - name: Install dependencies
         run: flutter pub get
