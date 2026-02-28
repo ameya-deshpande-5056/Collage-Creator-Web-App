@@ -86,6 +86,14 @@ npm install
 npm run package      # produces .AppImage and .deb files
 ```
 
+> **Got a blank window?** If you install one of the `.deb`/`.AppImage` packages and only see an empty grey screen, open the developer console and you may find an error like:
+>
+> ```
+> Not allowed to load local resource: file:///opt/collage-creator-electron/resources/build/web/index.html
+> ```
+>
+> This happens when the Electron entry script tries to load the web build from outside the ASAR archive.  The `main.js` shipped with the repository already includes logic to compute the correct path for development _and_ packaged runs, but if you have an older copy of `main.js` the relative path can escape the bundle and be blocked by the browser.  Re‑build the project (or copy the updated `main.js` from `electron-app/main.js`) and re‑package; the issue will disappear.
+
 #### Continuous integration
 
 The project uses a unified GitHub Actions workflow (`.github/workflows/electron-build-and-release.yml`) that:
