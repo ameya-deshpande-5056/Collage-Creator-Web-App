@@ -27,6 +27,12 @@
         "nsis",
         "portable"
       ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
     }
   }
 }

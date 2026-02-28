@@ -1,4 +1,4 @@
-name: Build Windows exe via Electron
+name: Build Linux packages via Electron
 
 on:
   push:
@@ -7,17 +7,16 @@ on:
     branches: [main]
 
 jobs:
-  windows:
-    runs-on: windows-latest
+  linux:
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      # Flutter setup (any release with Dart 3.7.2+ will satisfy sdk:^3.7.2)
+      # Flutter setup
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          # Use stable channel to install the current stable Flutter toolchain
           channel: stable
           architecture: X64
 
@@ -34,26 +33,28 @@ jobs:
 
       - name: Install electron deps
         working-directory: electron-app
-        # `npm ci` requires a package-lock.json. Use `npm install` so the
-        # workflow succeeds even when the lockfile isn't committed.
         run: npm install
 
-      - name: Package Windows executable
+      - name: Package Linux executable
         working-directory: electron-app
         run: npm run package
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-executable
-          path: electron-app/dist/*.exe
+          name: linux-packages
+          path: |
+            electron-app/dist/*.AppImage
+            electron-app/dist/*.deb
 
       - name: Create or update release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v1
         with:
-          files: electron-app/dist/*.exe
-          tag_name: latest-windows
+          files: |
+            electron-app/dist/*.AppImage
+            electron-app/dist/*.deb
+          tag_name: latest-linux
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -69,22 +69,36 @@ the following (Wine required on non‑Windows hosts):
 # from project root
 flutter build web --release
 cd electron-app
-npm ci
-npm run package      # produces dist/*.exe or installer
+npm install
+npm run package      # produces dist/*.exe, dist/*.AppImage, dist/*.deb
 ```
 
 `npm start` will launch the un‑packaged Electron app for manual testing.
 
+#### Linux packages (Electron)
+
+The same Electron setup can also build `.AppImage` and `.deb` packages for Linux:
+
+```bash
+flutter build web --release
+cd electron-app
+npm install
+npm run package      # produces .AppImage and .deb files
+```
+
 #### Continuous integration
 
-Two workflows are defined:
+Three workflows are defined:
 
-* `dart.yml` – performs `flutter pub get`, `dart analyze` and `dart test`
-	using a Flutter SDK >=4.0.0 (bundles Dart 3.7.2+) so that
-	`environment.sdk: ^3.7.2` in the pubspec resolves correctly.
-* `electron-windows.yml` – runs on `windows-latest`, builds the web app
-	and then packages it via Electron, uploading the resulting `.exe` as
-	an artifact.
+* `dart.yml` – performs `flutter pub get` and `flutter analyze`
+  using the stable Flutter channel (bundles Dart 3.7.2+) so that
+  `environment.sdk: ^3.7.2` in the pubspec resolves correctly.
+* `electron-windows.yml` – runs on `windows-latest`, builds the web app,
+  packages it via Electron for Windows, and publishes artifacts to the
+  **Releases** tab (tag: `latest-windows`).
+* `electron-linux.yml` – runs on `ubuntu-latest`, builds the web app,
+  packages it for Linux (AppImage + .deb), and publishes artifacts to the
+  **Releases** tab (tag: `latest-linux`).
 
 #### Testing
 
@@ -112,30 +126,33 @@ Dev dependencies include `flutter_test` and `flutter_lints`.
 * The Electron build is optional; you can ignore the `electron-app`
 	subdirectory if you only care about the web target.
 
-## Packaging as a Windows executable via Electron
+## Packaging as an Electron executable (Windows & Linux)
 
 This repository is primarily a Flutter web app, but you can wrap the
-`build/web` output in an Electron shell and create a Windows `.exe` or
-installer.  Two workflows are provided:
-1. **CI pipeline** – see `.github/workflows/electron-windows.yml`.  It runs on a
-	`windows-latest` runner, builds the web application, then invokes an
-	Electron project in `electron-app/` to produce the executable.  The
-	produced artifact is uploaded for download.
+`build/web` output in an Electron shell to create standalone binaries
+for Windows and Linux. Two CI workflows are provided:
 
-2. **Local build** – you can perform the same steps on your Linux machine
-	(Wine is required for Windows packaging):
+1. **Windows CI pipeline** – see `.github/workflows/electron-windows.yml`.
+   Runs on `windows-latest`, builds the web application, packages it via
+   Electron, and publishes the `.exe` files to a GitHub Release
+   (tag: `latest-windows`).
+
+2. **Linux CI pipeline** – see `.github/workflows/electron-linux.yml`.
+   Runs on `ubuntu-latest`, builds the web application, packages it via
+   Electron to create `.AppImage` and `.deb` files, and publishes them to a
+   GitHub Release (tag: `latest-linux`).
+
+3. **Local build** – You can perform the same steps on your own machine:
 
 	```bash
-	# 1. build the web app with Flutter (still on 3.7.2 or later)
+	# 1. build the web app with Flutter
 	flutter pub get
 	flutter build web --release
 
-	# 2. enter the Electron project
+	# 2. enter the Electron project and build
 	cd electron-app
-	npm ci                # installs electron & electron-builder
-
-	# 3. package for Windows; electron-builder will spawn Wine on Linux
-	npm run package       # produces `dist/*.exe` or installer
+	npm install                # installs electron & electron-builder
+	npm run package            # produces dist/*.exe, *.AppImage, *.deb
 	```
 
 	If you just want to run the app locally without packaging, use
@@ -151,3 +168,10 @@ installer.  Two workflows are provided:
 
 Feel free to tweak the `electron-app/build` section to adjust installer
 options, targets, or the application ID.
+## Downloaded Artifacts
+
+Once the Electron workflows have run, you can download the built executables
+from:
+- **GitHub Actions artifacts tab** – latest builds from each workflow run
+- **Releases page** – persistent releases tagged `latest-windows` and `latest-linux`
+  (updated on each push to `main`)
