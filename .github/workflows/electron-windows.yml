@@ -55,5 +55,6 @@ jobs:
           files: electron-app/dist/*.exe
           tag_name: latest-windows
           generate_release_notes: true
+          make_latest: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -37,7 +37,7 @@ jobs:
 
       - name: Package Linux executable
         working-directory: electron-app
-        run: npm run package
+        run: npm run package:linux
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -56,5 +56,6 @@ jobs:
             electron-app/dist/*.deb
           tag_name: latest-linux
           generate_release_notes: true
+          make_latest: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
