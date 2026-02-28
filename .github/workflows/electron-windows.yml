@@ -34,7 +34,9 @@ jobs:
 
       - name: Install electron deps
         working-directory: electron-app
-        run: npm ci
+        # `npm ci` requires a package-lock.json. Use `npm install` so the
+        # workflow succeeds even when the lockfile isn't committed.
+        run: npm install
 
       - name: Package Windows executable
         working-directory: electron-app
