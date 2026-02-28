@@ -1,0 +1,45 @@
+name: Build Windows exe via Electron
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Flutter setup (any release with Dart 3.7.2+ will satisfy sdk:^3.7.2)
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '>=4.0.0'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web version
+        run: flutter build web --release
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install electron deps
+        working-directory: electron-app
+        run: npm ci
+
+      - name: Package Windows executable
+        working-directory: electron-app
+        run: npm run package
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-executable
+          path: electron-app/dist/*.exe

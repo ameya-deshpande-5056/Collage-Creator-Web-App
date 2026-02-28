@@ -1,0 +1,29 @@
+{
+  "name": "collage-creator-electron",
+  "version": "1.0.0",
+  "description": "Electron wrapper for Collage Creator Web App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^26.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.example.collagecreator",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "../build/web/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    }
+  }
+}
